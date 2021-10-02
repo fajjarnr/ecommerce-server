@@ -13,7 +13,22 @@ exports.create = async (req, res) => {
   }
 };
 
-exports.read = async (req, res) => {
-  let products = await Product.find({});
+exports.listAll = async (req, res) => {
+  let products = await Product.find({})
+    .limit(parseInt(req.params.count))
+    .populate("category")
+    .populate("subs")
+    .sort([["createdAt", "desc"]])
+    .exec();
   res.json(products);
+};
+
+exports.remove = async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const product = await Product.findOneAndRemove({ slug }).exec();
+    return res.json(product);
+  } catch (error) {
+    return res.status(400).send("Product Delete Failed");
+  }
 };
