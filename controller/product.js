@@ -23,6 +23,14 @@ exports.listAll = async (req, res) => {
   res.json(products);
 };
 
+exports.read = async (req, res) => {
+  const product = await Product.findOne({ slug: req.params.slug })
+    .populate("category")
+    .populate("subs")
+    .exec();
+  res.json(product);
+};
+
 exports.remove = async (req, res) => {
   try {
     const { slug } = req.params;
