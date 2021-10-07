@@ -23,6 +23,43 @@ exports.listAll = async (req, res) => {
   res.json(products);
 };
 
+// WITHOUT PAGINATION
+// exports.list = async (req, res) => {
+//   try {
+//     const { sort, order, limit } = req.body;
+//     const products = await Product.find({})
+//       .populate("category")
+//       .populate("subs")
+//       .sort([[sort, order]])
+//       .limit(limit)
+//       .exec();
+
+//     res.json(products);
+//   } catch (err) {
+//     console.log(err);
+//   }
+// };
+
+exports.list = async (req, res) => {
+  try {
+    const { sort, order, page } = req.body;
+    let currentPage = page || 1;
+    let perPage = 3;
+
+    const products = await Product.find({})
+      .skip((currentPage - 1) * perPage)
+      .populate("category")
+      .populate("subs")
+      .sort([[sort, order]])
+      .limit(perPage)
+      .exec();
+
+    res.json(products);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 exports.read = async (req, res) => {
   const product = await Product.findOne({ slug: req.params.slug })
     .populate("category")
@@ -57,4 +94,9 @@ exports.remove = async (req, res) => {
   } catch (error) {
     return res.status(400).send("Product Delete Failed");
   }
+};
+
+exports.productsCount = async (req, res) => {
+  let product = await Product.estimatedDocumentCount().exec();
+  res.json(product);
 };
